@@ -81,24 +81,7 @@ async function handleModels (apiKey) {
   });
   let { body } = response;
   if (response.ok) {
-    const { embeddings } = JSON.parse(await response.text());
-    const tokenCountPerInput = 50; // ước lượng, có thể điều chỉnh
-    const total_tokens = tokenCountPerInput * embeddings.length;
-
-    body = JSON.stringify({
-      object: "list",
-      data: embeddings.map(({ values }, index) => ({
-        object: "embedding",
-        index,
-        embedding: values,
-      })),
-      model: req.model,
-      usage: {
-        prompt_tokens: total_tokens,
-        total_tokens: total_tokens
-      }
-    }, null, "  ");
-  } = JSON.parse(await response.text());
+    const { models } = JSON.parse(await response.text());
     body = JSON.stringify({
       object: "list",
       data: models.map(({ name }) => ({
@@ -143,6 +126,9 @@ async function handleEmbeddings (req, apiKey) {
   let { body } = response;
   if (response.ok) {
     const { embeddings } = JSON.parse(await response.text());
+    const tokenCountPerInput = 50;
+    const total_tokens = tokenCountPerInput * req.input.length;
+
     body = JSON.stringify({
       object: "list",
       data: embeddings.map(({ values }, index) => ({
@@ -151,6 +137,10 @@ async function handleEmbeddings (req, apiKey) {
         embedding: values,
       })),
       model: req.model,
+      usage: {
+        prompt_tokens: total_tokens,
+        total_tokens: total_tokens
+      }
     }, null, "  ");
   }
   return new Response(body, fixCors(response));
